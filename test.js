@@ -180,10 +180,7 @@ var test = function() {
      * @param {*} found Tested value.
      */
     true: function(title, found) {
-      assert(initialized, 'Not initialized');
-      found === true ?
-        success(title) :
-        failure(title, {type: this.T_PRIMITIVES_NOT_EQUAL, found: found, expected: true});
+      this.eq(title, found, true);
     },
     /**
      * Check if passed values are equal.
