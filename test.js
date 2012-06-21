@@ -28,7 +28,7 @@ var test = function() {
   }
 
   /**
-   * Sends information to renderer about successful test.
+   * Send information to renderer about successful test.
    * @param {string} title Test's title.
    */
   function success(title) {
@@ -36,7 +36,7 @@ var test = function() {
   }
 
   /**
-   * Sends information to renderer about failed test.
+   * Send information to renderer about failed test.
    * @param {string} title Test's title.
    * @param {Object} reason Failure's reason.
    */
@@ -62,58 +62,51 @@ var test = function() {
   }
 
   /**
-   * @param {*} a First input.
-   * @param {*} b Second input.
-   * @param {Array} path Search path.
-   * @return {Object|true} Resulst of equality.
+   * @param {*} found
+   * @param {*} expected
+   * @param {Array} where
+   * @return {Object|true}
    */
-  function areEqual_(a, b, path) {
-    var i,
-        res,
-        aKeys,
-        bKeys,
-        aType = type(a),
-        bType = type(b),
-        len;
+  function areEqual_(found, expected, where) {
+    var foundType = type(found),
+        expectedType = type(expected),
+        i;
 
-    if (aType !== bType) {
+    if (foundType !== expectedType) {
       return {
         type: test.T_TYPES_MISMATCH,
-        where: path,
-        found: aType,
-        expected: bType
+        where: where,
+        found: foundType,
+        expected: expectedType
       };
     }
 
-    if (type(a) === 'primitive') {
-      if (a === b) {
-        return true;
-      }
-      else {
-        return {
+    if (foundType === 'primitive') {
+      return found === expected ?
+        true :
+        {
           type: test.T_PRIMITIVES_NOT_EQUAL,
-          where: path,
-          found: a,
-          expected: b
+          where: where,
+          found: found,
+          expected: expected
         };
-      }
     }
 
-    if (type(a) === 'array') {
-      if (a.length !== b.length) {
+    if (foundType === 'array') {
+      if (found.length !== expected.length) {
         return {
           type: test.T_LENGTHS_NOT_EQUAL,
-          where: path,
-          found: a.length,
-          expected: b.length
+          where: where,
+          found: found.length,
+          expected: expected.length
         };
       }
 
-      for (i = 0; i < a.length; i++) {
-        res = areEqual_(a[i], b[i], []);
+      for (i = 0; i < found.length; i++) {
+        res = areEqual_(found[i], expected[i], []);
 
         if (res !== true) {
-          res.where = path.concat(i, res.where);
+          res.where = where.concat(i, res.where);
           return res;
         }
       }
@@ -121,25 +114,33 @@ var test = function() {
       return true;
     }
 
-    aKeys = Object.keys(a).sort();
-    bKeys = Object.keys(b).sort();
-    len = Math.max(aKeys.length, bKeys.length);
+    var foundKeys = Object.keys(found).sort(),
+        expectedKeys = Object.keys(expected).sort(),
+        foundKey,
+        expectedKey,
+        max = Math.max(foundKeys.length, expectedKeys.length);
 
-    for(i = 0; i < len; i++) {
-      if(aKeys[i] !== bKeys[i]) {
+    for(i = 0; i < max; i++) {
+      foundKey = foundKeys[i];
+      expectedKey = expectedKeys[i];
+
+      if(foundKey !== expectedKey) {
+        res = foundKey === undefined || foundKey > expectedKey
+
         return {
-          type: test.T_MISSING_PROPERTY,
-          where: path,
-          property: aKeys[i] < bKeys[i] ? aKeys[i] : bKeys[i]
-        }
+          type: res ? test.T_MISSING_PROPERTY : test.T_EXTRA_PROPERTY,
+          property: res ? expectedKey : foundKey,
+          where: where
+        };
       }
     }
 
-    for(i = 0; i < aKeys.length; i++) {
-      res = areEqual_(a[aKeys[i]], b[aKeys[i]], []);
+    for(i = 0; i < foundKeys.length; i++) {
+      foundKey = foundKeys[i];
+      res = areEqual_(found[foundKey], expected[foundKey], []);
 
       if(res !== true) {
-        res.where = path.concat(aKeys[i], res.where);
+        res.where = where.concat(foundKey, res.where);
         return res;
       }
     }
@@ -147,8 +148,14 @@ var test = function() {
     return true;
   }
 
-  function areEqual(a, b) {
-    return areEqual_(a, b, []);
+  /**
+   * Check if passed values are equal.
+   * @param {*} expected
+   * @param {*} found
+   * @return {boolean|Object}
+   */
+  function areEqual(expected, found) {
+    return areEqual_(expected, found, []);
   }
 
   return {
@@ -168,7 +175,7 @@ var test = function() {
       initialized = true;
     },
     /**
-     * Check is passed value equals (===) to true.
+     * Check if passed value equals (===) to true.
      * @param {string} title Test's title.
      * @param {*} found Tested value.
      */
