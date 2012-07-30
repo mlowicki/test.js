@@ -216,6 +216,46 @@ var test = function() {
         return;
       }
       failure(title, {type: this.T_MISSING_EXCEPTION, expected: {type: exc, msg: excMsg}});
+    },
+    /**
+     * Starts new group.
+     * @param {string} groupName Group's name.
+     */
+    beginGroup: function(groupName) {
+      assert(initialized, 'Not initialized');
+      renderer.beginGroup(groupName);
+    },
+    /**
+     * Ends currently active group.
+     */
+    endGroup: function() {
+      assert(initialized, 'Not initialized');
+      renderer.endGroup();
     }
   };
 }();
+
+
+/**
+ * Test renderer base class.
+ * @constructor
+ */
+test.TestRenderer = function() {};
+
+/**
+ * Starts new group.
+ * @param {string} groupName Group's name.
+ */
+test.TestRenderer.prototype.beginGroup = function(name) {};
+
+/**
+ * Ends currently active group.
+ */
+test.TestRenderer.prototype.endGroup = function() {};
+
+/**
+ * @param {boolean} success True if results was successful.
+ * @param {string} title Test's title.
+ * @param {Object} reason Failure's reason.
+ */
+test.TestRenderer.prototype.showTestResult = function(success, title, reason) {};
