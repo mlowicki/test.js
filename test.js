@@ -231,6 +231,18 @@ var test = function() {
     endGroup: function() {
       assert(initialized, 'Not initialized');
       renderer.endGroup();
+    },
+    /**
+     * Inherits the prototype methods from one constructor into another.
+     * @param {Function} child Child constructor.
+     * @param {Function} parent Parent constructor.
+     */
+    inherits: function(child, parent) {
+      /** @constructor */
+      function temp() {};
+      temp.prototype = parent.prototype;
+      child.prototype = new temp();
+      child.prototype.constructor = child;
     }
   };
 }();
